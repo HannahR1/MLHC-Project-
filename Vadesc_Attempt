@@ -1,0 +1,38 @@
+The following are the packages that we used to get vadesc to work, and the code we
+wrote the generate the intial clusters:
+# install necessary packages :
+!pip install lifelines
+!pip install torchtuples
+!pip install pycox
+!pip install torch
+!pip install utils
+!pip install tensorflow_probability
+!pip install tensorflow
+!pip install progressbar
+!pip install opencv-python
+!pip install pydicom
+!pip install pydicom_seg
+!pip install pyradiomics
+!pip install openTSNE
+!pip install scikit-learn==0.22.2
+!pip install tqdm
+def generate_data(data_frame, seed=42):
+np.random.seed(seed)
+to_drop = [’time_to_event_dementia’, ’dementia_status’]
+one_hot_encoder_list = cat_feats
+data_frame = one_hot_encoder(data=data_frame, encode=one_hot_encoder_list)
+t_data = data_frame[[’time_to_event_dementia’]]
+e_data = data_frame[[’dementia_status’]]
+# dzgroup roughly corresponds to the diagnosis; more fine-grained than dzclass
+c_data = data_frame[[’dementia_status’]]
+c_data[’dementia_status’] = c_data[’dementia_status’].astype(’category’)
+c_data[’dementia_status’] = c_data[’dementia_status’].cat.codes
+x_data = data_frame.drop(labels=to_drop, axis=1)
+print(x_data.columns)
+encoded_indices = one_hot_indices(x_data, one_hot_encoder_list)
+include_idx = set(np.array(sum(encoded_indices, [])))
+mask = np.array([(i in include_idx) for i in np.arange(x_data.shape[1])])
+covariates = np.array(x_data.columns.values)
+x = np.array(x_data).reshape(x_data.shape)
+t = np.array(t_data).reshape(len(t_data))
+26
