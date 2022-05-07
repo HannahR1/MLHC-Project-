@@ -1,0 +1,13 @@
+#CoxPH Models
+'''
+To prepare the data for CoxPH, we split the data in the same way as PSET 5 used
+simpleimputer, with strategy = "most_frequent" for the categorical variables and strategy = "mean"
+for the continuous variables. Then, we specify the features for the training, validation, and
+test sets as follows:
+'''
+dementia_train = dementia_train[FEATURES+[’time_to_event_dementia’, ’dementia_status’]]
+dementia_valid = dementia_valid[FEATURES+[’time_to_event_dementia’, ’dementia_status’]]
+dementia_test = dementia_test[FEATURES+[’time_to_event_dementia’, ’dementia_status’]]
+stroke_train = stroke_train[FEATURES+[’time_to_event_stroke’, ’stroke_status’]]
+stroke_valid = stroke_valid[FEATURES+[’time_to_event_stroke’, ’stroke_status’]]
+stroke_test = stroke_test[FEATURES+[’time_to_event_stroke’, ’stroke_status’]]
