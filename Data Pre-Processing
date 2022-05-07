@@ -1,0 +1,10 @@
+df_bcs_features = pd.read_csv("../../features_for_bcs.csv", delimiter = ",")
+dementia = pd.read_csv("../../Labels_ZY/UKBB_Dementia_202109.tsv", delimiter = "\t")
+stroke = pd.read_csv("../../Labels_ZY/UKBB_Stroke_202109_v2.tsv", delimiter = "\t")
+bcs_features = pd.read_excel("../../fields_to_be_kept.xlsx")[’eid’].tolist()
+bcs_features.append(’eid’)
+df_bcs_features = df_bcs_features[bcs_features]
+df_dementia = pd.merge(df_bcs_features, dementia, left_on=[’eid’], right_on=[’sample_id’],
+how=’inner’)
+df_all = pd.merge(df_dementia, stroke, left_on=[’eid’], right_on=[’sample_id’],
+how=’inner’, suffixes=(’_dementia’,’_stroke’))
