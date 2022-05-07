@@ -1,0 +1,35 @@
+controls_bool = (df_all["incident_disease_stroke"] == 0) &
+(df_all["prevalent_disease_dementia"] == 0) &
+(df_all["incident_disease_dementia"] == 0) &
+(df_all["prevalent_disease_stroke"] == 0)&
+(df_all["has_died_stroke"] == 0) &
+(df_all["has_died_dementia"] == 0)
+dementia_bool = (df_all["incident_disease_dementia"]==True)
+stroke_bool = (df_all["incident_disease_stroke"] == True)
+df = df_all[(controls_bool) | (dementia_bool) | (stroke_bool)]
+df.loc[(controls_bool), "time_to_event_stroke"]
+= pd.to_numeric(pd.to_datetime(df[(controls_bool)]["censor_date_stroke"]) -
+pd.to_datetime(df[(controls_bool)]["enroll_date_stroke"]))/1000000000/60/60/24
+df.loc[(controls_bool), "time_to_event_dementia"]
+= pd.to_numeric(pd.to_datetime(df[(controls_bool)]["censor_date_dementia"]) -
+pd.to_datetime(df[(controls_bool)]["enroll_date_dementia"]))/1000000000/60/60/24
+df.loc[(controls_bool), "dementia_status"] = 0
+df.loc[(controls_bool), "stroke_status"] = 0
+df.loc[(dementia_bool), "time_to_event_stroke"]
+= pd.to_numeric(pd.to_datetime(df[(dementia_bool)]["censor_date_stroke"]) -
+pd.to_datetime(df[(dementia_bool)]["enroll_date_stroke"]))/1000000000/60/60/24
+df.loc[(dementia_bool), "time_to_event_dementia"]
+= pd.to_numeric(pd.to_datetime(df[(dementia_bool)]["censor_date_dementia"]) -
+pd.to_datetime(df[(dementia_bool)]["enroll_date_dementia"]))/1000000000/60/60/24
+df.loc[(dementia_bool), "dementia_status"] = 1
+df.loc[(dementia_bool), "stroke_status"] = 0
+df.loc[(stroke_bool),"time_to_event_stroke"]
+= pd.to_numeric(pd.to_datetime(df[(stroke_bool)]["censor_date_stroke"]) -
+pd.to_datetime(df[(stroke_bool)]["enroll_date_stroke"]))/1000000000/60/60/24
+df.loc[(stroke_bool),"time_to_event_dementia"]
+= pd.to_numeric(pd.to_datetime(df[(stroke_bool)]["censor_date_dementia"]) -
+pd.to_datetime(df[(stroke_bool)]["enroll_date_dementia"]))/1000000000/60/60/24
+df.loc[(stroke_bool),"dementia_status"] = 0
+df.loc[(stroke_bool),"stroke_status"] = 1
+df.loc[(stroke_bool & dementia_bool),"dementia_status"] = 1
+df.loc[(stroke_bool & dementia_bool),"stroke_status"] = 1
