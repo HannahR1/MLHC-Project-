@@ -1,0 +1,55 @@
+from statistics import median, mean, mode
+from lifelines.statistics import survival_difference_at_fixed_point_in_time_test
+# kaplan meier analysis
+dementia_df_km = pd.concat([df[dementia_bool][all_features+["time_to_event_dementia",
+"dementia_status"]],
+df[controls_bool][all_features+["time_to_event_dementia",
+"dementia_status"]].sample(n= len(df[dementia_bool]))])
+stroke_df_km = pd.concat([df[stroke_bool][all_features+["time_to_event_stroke",
+"stroke_status"]],
+df[controls_bool][all_features+["time_to_event_stroke",
+"stroke_status"]].sample(n= len(df[stroke_bool]))])
+def dementia_kms(features, categorical, dementia_df_km):
+print("Dementia Statistics:")
+D = {}
+kmf_dementia = KaplanMeierFitter(label="Dementia and Controls (n = " +
+str(len(dementia_df_km)) + ’)’)
+kmf_dementia.fit(dementia_df_km[’time_to_event_dementia’],
+dementia_df_km["dementia_status"])
+kmf_dementia.plot()
+for feat, cate in zip(features, categorical):
+D[feat] = []
+if cate:
+for c in cate:
+high = dementia_df_km[dementia_df_km[feat] == c]
+kmf_dementia_high = KaplanMeierFitter(label= "Dementia and Controls
+(n = " + str(len(high)) + ’) ’ + feat + ’, ’ + str(c))
+kmf_dementia_high.fit(high[’time_to_event_dementia’],
+high["dementia_status"])
+kmf_dementia_high.plot()
+D[feat].append(kmf_dementia_high)
+else:
+q = list(dementia_df_km[feat].quantile([0.2,0.8]))
+med_high_feat = q[-1]
+med_low_feat = q[0]
+high = dementia_df_km[dementia_df_km[feat] >= med_high_feat]
+kmf_dementia_high = KaplanMeierFitter(label="Dementia and Controls
+24
+Identifying Characteristics of Brain Health with Survival Modelling
+(n = " + str(len(high)) + ’) ’ + feat + ’, High ’)
+kmf_dementia_high.fit(high[’time_to_event_dementia’],high["dementia_status"])
+kmf_dementia_high.plot()
+D[feat].append(kmf_dementia_high)
+low = dementia_df_km[dementia_df_km[feat] <= med_low_feat]
+kmf_dementia_low = KaplanMeierFitter(label="Dementia and Controls
+(n = " + str(len(low)) + ’) ’ + feat + ’, Low ’)
+kmf_dementia_low.fit(low[’time_to_event_dementia’],low["dementia_status"])
+kmf_dementia_low.plot()
+D[feat].append(kmf_dementia_low)
+for feat in D:
+results = survival_difference_at_fixed_point_in_time_test(point_in_time=100,
+fitterA=D[feat][0], fitterB=D[feat][-1])
+print(feat + ’ Chi-squared(1) Test statistic=’+str(results.test_statistic) + ’
+p-value=’+str(results.p_value))
+features, categories = ["Smoking status", ’HDL cholesterol’], [[0,1,2], False]
+dementia_kms(features, categories, dementia_df_km)
